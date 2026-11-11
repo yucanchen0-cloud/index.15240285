@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今天吃什麼？抽籤器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #263238;
+      --muted: #65737e;
+      --accent: #e87545;
+      --accent-dark: #c95b2e;
+      --paper: #fffdf9;
+      --line: #eadfd4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg, #fff1df, #fce5df 55%, #f8eee4);
+    }
+
+    .app {
+      width: min(100%, 560px);
+      padding: 32px;
+      background: var(--paper);
+      border: 1px solid rgba(234, 223, 212, .9);
+      border-radius: 24px;
+      box-shadow: 0 18px 55px rgba(91, 61, 42, .12);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: clamp(1.8rem, 5vw, 2.35rem);
+    }
+
+    .subtitle {
+      margin: 0 0 26px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 9px;
+      font-weight: 700;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 160px;
+      padding: 14px 16px;
+      resize: vertical;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      line-height: 1.8;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(232, 117, 69, .14);
+    }
+
+    .hint {
+      margin: 8px 0 18px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px 20px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-size: 1.08rem;
+      font-weight: 750;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+
+    button:hover { background: var(--accent-dark); }
+    button:active { transform: scale(.985); }
+    button:focus-visible { outline: 3px solid #f4b08e; outline-offset: 3px; }
+
+    .result {
+      margin-top: 22px;
+      min-height: 128px;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      border: 2px dashed #f0c4aa;
+      border-radius: 18px;
+      background: #fff7f0;
+      text-align: center;
+    }
+
+    .result-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    #resultText {
+      margin: 0;
+      color: var(--accent-dark);
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    #resultText.error {
+      color: #b42318;
+      font-size: 1rem;
+      font-weight: 650;
+    }
+
+    @media (max-width: 480px) {
+      .app { padding: 24px 19px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>今天吃什麼？</h1>
+    <p class="subtitle">把選擇交給命運，今天就不用煩惱啦！</p>
+
+    <label for="options">候選餐點（每行輸入一個選項）</label>
+    <textarea id="options" spellcheck="false">便當
+麵
+咖哩
+水餃</textarea>
+    <p class="hint">抽籤時會自動略過空白行，並合併完全相同的選項。</p>
+
+    <button id="drawButton" type="button">幫我選</button>
+
+    <section class="result" aria-live="polite" aria-atomic="true">
+      <div>
+        <p class="result-label">今天的幸運餐點是⋯⋯</p>
+        <p id="resultText">等你來抽籤！</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const optionsInput = document.getElementById("options");
+    const drawButton = document.getElementById("drawButton");
+    const resultText = document.getElementById("resultText");
+
+    drawButton.addEventListener("click", () => {
+      // 去除每行前後空白、刪除空白行，並移除完全相同的重複選項。
+      const options = [...new Set(
+        optionsInput.value
+          .split(/\r?\n/)
+          .map(option => option.trim())
+          .filter(option => option.length > 0)
+      )];
+
+      if (options.length === 0) {
+        resultText.textContent = "請先輸入至少一個選項";
+        resultText.classList.add("error");
+        return;
+      }
+
+      // 每個有效選項各占一個位置，因此被抽中的機率相同。
+      const randomIndex = Math.floor(Math.random() * options.length);
+      resultText.textContent = options[randomIndex];
+      resultText.classList.remove("error");
+    });
+  </script>
+</body>
+</html>
